@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Hub Free — Self-hosted WhatsApp Messaging</title>
+  <meta name="description" content="Free, open-source, self-hosted WhatsApp messaging platform. Upload contacts, broadcast messages, manage your inbox, build templates, and schedule recurring campaigns.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #06140d; color: #eafff4; line-height: 1.8; }
+    html[dir="rtl"] body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* Header */
+    header { background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); padding: 60px 0; text-align: center; position: relative; }
+    header h1 { font-size: 3rem; color: white; margin-bottom: 20px; font-weight: 700; }
+    header p { font-size: 1.3rem; color: rgba(255,255,255,0.95); max-width: 800px; margin: 0 auto 30px; }
+
+    /* Language toggle */
+    .lang-toggle { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; }
+    html[dir="rtl"] .lang-toggle { right: auto; left: 20px; }
+    .lang-btn { padding: 8px 16px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.5); background: transparent; color: white; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
+    .lang-btn.active { background: white; color: #25d366; border-color: white; }
+    .lang-btn:hover { background: rgba(255,255,255,0.2); }
+    .lang-btn.active:hover { background: #f0f0f0; }
+
+    /* CTA Buttons */
+    .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s; display: inline-block; }
+    .btn-primary { background: white; color: #25d366; }
+    .btn-primary:hover { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    .btn-secondary { background: transparent; color: white; border: 2px solid white; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* Sections */
+    section { padding: 60px 0; }
+    .section-title { font-size: 2rem; text-align: center; margin-bottom: 40px; color: #25d366; }
+
+    /* Stats */
+    .stats { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; padding: 40px 0; }
+    .stat { text-align: center; }
+    .stat-number { font-size: 3rem; font-weight: 700; color: #25d366; }
+    .stat-label { color: rgba(234,255,244,0.7); }
+
+    /* Features grid */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+    .feature-card { background: rgba(37,211,102,0.05); border: 1px solid rgba(37,211,102,0.2); border-radius: 12px; padding: 30px; transition: all 0.3s; }
+    .feature-card:hover { transform: translateY(-5px); border-color: #25d366; box-shadow: 0 10px 30px rgba(37,211,102,0.1); }
+    .feature-icon { font-size: 2.5rem; margin-bottom: 15px; }
+    .feature-card h3 { font-size: 1.3rem; margin-bottom: 10px; color: #25d366; }
+    .feature-card p { color: rgba(234,255,244,0.8); }
+
+    /* Quick start */
+    .quick-start { background: #0a1f14; border-radius: 12px; padding: 30px; max-width: 700px; margin: 0 auto; }
+    .quick-start pre { background: #06140d; border: 1px solid rgba(37,211,102,0.2); border-radius: 8px; padding: 20px; overflow-x: auto; direction: ltr; text-align: left; }
+    .quick-start code { color: #25d366; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+    /* Tech stack */
+    .tech-stack { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 20px 0; }
+    .tech-badge { background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.3); padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; }
+
+    /* Use cases */
+    .use-cases { background: rgba(37,211,102,0.03); }
+    .use-case-list { list-style: none; max-width: 600px; margin: 0 auto; }
+    .use-case-list li { padding: 15px 0; border-bottom: 1px solid rgba(37,211,102,0.1); display: flex; align-items: center; gap: 15px; }
+    .use-case-list li::before { content: "\2713"; color: #25d366; font-weight: bold; font-size: 1.3rem; }
+
+    /* Footer */
+    footer { background: #041008; padding: 40px 0; text-align: center; color: rgba(234,255,244,0.5); }
+    footer a { color: #25d366; text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header h1 { font-size: 2rem; }
+      .stats { gap: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-en" onclick="switchLang('en')">EN</button>
+      <button class="lang-btn" id="btn-ar" onclick="switchLang('ar')">AR</button>
+    </div>
+    <div class="container">
+      <h1 id="hero-title">WhatsApp Hub Free</h1>
+      <p id="hero-subtitle">Free, open-source, self-hosted WhatsApp messaging. Your server, your data, your rules.</p>
+      <div class="cta-buttons">
+        <a href="https://github.com/Ibrahim-Abedrabboh/whatsapp-hub-free" class="btn btn-primary" id="btn-star">Star on GitHub</a>
+        <a href="#quick-start" class="btn btn-secondary" id="btn-quickstart">Quick Start</a>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="container">
+      <div class="stats">
+        <div class="stat"><div class="stat-number">MIT</div><div class="stat-label" data-en="Open Source" data-ar="\u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0645\u0635\u062f\u0631">Open Source</div></div>
+        <div class="stat"><div class="stat-number">100%</div><div class="stat-label" data-en="Self-hosted" data-ar="\u0627\u0633\u062a\u0636\u0627\u0641\u0629 \u0630\u0627\u062a\u064a\u0629">Self-hosted</div></div>
+        <div class="stat"><div class="stat-number">AR/EN</div><div class="stat-label" data-en="Bilingual" data-ar="\u062b\u0646\u0627\u0626\u064a \u0627\u0644\u0644\u063a\u0629">Bilingual</div></div>
+        <div class="stat"><div class="stat-number">Free</div><div class="stat-label" data-en="Forever" data-ar="\u0645\u062c\u0627\u0646\u064a \u0644\u0644\u0623\u0628\u062f">Forever</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title" data-en="Key Features" data-ar="\u0627\u0644\u0645\u0645\u064a\u0632\u0627\u062a \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629">Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">\ud83d\udce4</div>
+          <h3 data-en="Contact Upload & Broadcast" data-ar="\u0631\u0641\u0639 \u062c\u0647\u0627\u062a \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0648\u0627\u0644\u0628\u062b">Contact Upload & Broadcast</h3>
+          <p data-en="Upload CSV contacts and send bulk messages to thousands of recipients. Track delivery, read receipts, and campaign performance in real time." data-ar="\u0627\u0631\u0641\u0639 \u062c\u0647\u0627\u062a \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0645\u0646 \u0645\u0644\u0641\u0627\u062a CSV \u0648\u0623\u0631\u0633\u0644 \u0631\u0633\u0627\u0626\u0644 \u062c\u0645\u0627\u0639\u064a\u0629 \u0644\u0622\u0644\u0627\u0641 \u0627\u0644\u0645\u0633\u062a\u0644\u0645\u064a\u0646. \u062a\u062a\u0628\u0639 \u0627\u0644\u062a\u0633\u0644\u064a\u0645 \u0648\u0625\u064a\u0635\u0627\u0644\u0627\u062a \u0627\u0644\u0642\u0631\u0627\u0621\u0629 \u0648\u0623\u062f\u0627\u0621 \u0627\u0644\u062d\u0645\u0644\u0627\u062a \u0641\u064a \u0627\u0644\u0648\u0642\u062a \u0627\u0644\u0641\u0639\u0644\u064a.">Upload CSV contacts and send bulk messages to thousands of recipients. Track delivery, read receipts, and campaign performance in real time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">\ud83d\udcac</div>
+          <h3 data-en="Two-way Inbox" data-ar="\u0635\u0646\u062f\u0648\u0642 \u0648\u0627\u0631\u062f \u062b\u0646\u0627\u0626\u064a \u0627\u0644\u0627\u062a\u062c\u0627\u0647">Two-way Inbox</h3>
+          <p data-en="Receive and reply to messages in a live conversation view. Manage the 24-hour service window, send media, and keep your customers engaged." data-ar="\u0627\u0633\u062a\u0642\u0628\u0644 \u0627\u0644\u0631\u0633\u0627\u0626\u0644 \u0648\u0631\u062f \u0639\u0644\u064a\u0647\u0627 \u0641\u064a \u0639\u0631\u0636 \u0645\u062d\u0627\u062f\u062b\u0627\u062a \u062d\u064a. \u0623\u062f\u0631 \u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u062e\u062f\u0645\u0629 24 \u0633\u0627\u0639\u0629\u060c \u0623\u0631\u0633\u0644 \u0648\u0633\u0627\u0626\u0637\u060c \u0648\u0627\u0628\u0642 \u0639\u0644\u0649 \u062a\u0648\u0627\u0635\u0644 \u0645\u0639 \u0639\u0645\u0644\u0627\u0626\u0643.">Receive and reply to messages in a live conversation view. Manage the 24-hour service window, send media, and keep your customers engaged.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">\ud83c\udfa8</div>
+          <h3 data-en="Template Builder" data-ar="\u0628\u0646\u0627\u0621 \u0627\u0644\u0642\u0648\u0627\u0644\u0628">Template Builder</h3>
+          <p data-en="Design rich message templates with media headers, coupon codes, carousels, and interactive buttons (call, URL, quick reply). Preview before sending." data-ar="\u0635\u0645\u0645 \u0642\u0648\u0627\u0644\u0628 \u0631\u0633\u0627\u0626\u0644 \u063a\u0646\u064a\u0629 \u0628\u0631\u0624\u0648\u0633 \u0648\u0633\u0627\u0626\u0637\u060c \u0623\u0643\u0648\u0627\u062f \u0643\u0648\u0628\u0648\u0646\u060c \u0634\u0631\u0627\u0626\u0637 \u0639\u0631\u0636\u060c \u0648\u0623\u0632\u0631\u0627\u0631 \u062a\u0641\u0627\u0639\u0644\u064a\u0629 (\u0627\u062a\u0635\u0627\u0644\u060c URL\u060c \u0631\u062f \u0633\u0631\u064a\u0639). \u0639\u0627\u064a\u0646 \u0642\u0628\u0644 \u0627\u0644\u0625\u0631\u0633\u0627\u0644.">Design rich message templates with media headers, coupon codes, carousels, and interactive buttons (call, URL, quick reply). Preview before sending.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">\ud83d\udcc5</div>
+          <h3 data-en="Recurring Campaigns" data-ar="\u062d\u0645\u0644\u0627\u062a \u0645\u062a\u0643\u0631\u0631\u0629">Recurring Campaigns</h3>
+          <p data-en="Schedule campaigns to run on a recurring basis. Set it and forget it — automated messaging on your schedule with pause/resume controls." data-ar="\u062c\u062f\u0648\u0644 \u0627\u0644\u062d\u0645\u0644\u0627\u062a \u0644\u062a\u0639\u0645\u0644 \u0628\u0634\u0643\u0644 \u0645\u062a\u0643\u0631\u0631. \u0636\u0639\u0647\u0627 \u0648\u0627\u0646\u0633\u0647\u0627 \u2014 \u0631\u0633\u0627\u0626\u0644 \u062a\u0644\u0642\u0627\u0626\u064a\u0629 \u062d\u0633\u0628 \u062c\u062f\u0648\u0644\u0643 \u0645\u0639 \u0623\u062f\u0648\u0627\u062a \u0625\u064a\u0642\u0627\u0641/\u0627\u0633\u062a\u0626\u0646\u0627\u0641.">Schedule campaigns to run on a recurring basis. Set it and forget it — automated messaging on your schedule with pause/resume controls.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="use-cases">
+    <div class="container">
+      <h2 class="section-title" data-en="Who Is It For?" data-ar="\u0644\u0645\u0646 \u0647\u0630\u0627 \u0627\u0644\u0645\u0634\u0631\u0648\u0639\u061f">Who Is It For?</h2>
+      <ul class="use-case-list">
+        <li data-en="Small businesses managing their own WhatsApp" data-ar="\u0627\u0644\u0634\u0631\u0643\u0627\u062a \u0627\u0644\u0635\u063a\u064a\u0631\u0629 \u0627\u0644\u062a\u064a \u062a\u062f\u064a\u0631 \u0648\u0627\u062a\u0633\u0627\u0628 \u0628\u0646\u0641\u0633\u0647\u0627">Small businesses managing their own WhatsApp</li>
+        <li data-en="Developers who want full control over their messaging stack" data-ar="\u0627\u0644\u0645\u0637\u0648\u0631\u064a\u0646 \u0627\u0644\u0630\u064a\u0646 \u064a\u0631\u064a\u062f\u0648\u0646 \u062a\u062d\u0643\u0645\u0627\u064b \u0643\u0627\u0645\u0644\u0627\u064b \u0641\u064a \u0628\u064a\u0626\u0629 \u0627\u0644\u0631\u0633\u0627\u0626\u0644">Developers who want full control over their messaging stack</li>
+        <li data-en="Anyone who wants a free alternative to paid WhatsApp APIs" data-ar="\u0623\u064a \u0634\u062e\u0635 \u064a\u0631\u064a\u062f \u0628\u062f\u064a\u0644\u0627\u064b \u0645\u062c\u0627\u0646\u064a\u0627\u064b \u0644\u0648\u0627\u062c\u0647\u0627\u062a WhatsApp \u0627\u0644\u0645\u062f\u0641\u0648\u0639\u0629">Anyone who wants a free alternative to paid WhatsApp APIs</li>
+        <li data-en="Teams that need data sovereignty and self-hosting" data-ar="\u0627\u0644\u0641\u0631\u0642 \u0627\u0644\u062a\u064a \u062a\u062d\u062a\u0627\u062c \u0633\u064a\u0627\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0648\u0627\u0644\u0627\u0633\u062a\u0636\u0627\u0641\u0629 \u0627\u0644\u0630\u0627\u062a\u064a\u0629">Teams that need data sovereignty and self-hosting</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="quick-start">
+    <div class="container">
+      <h2 class="section-title" data-en="Get Started in 5 Minutes" data-ar="\u0627\u0628\u062f\u0623 \u0641\u064a 5 \u062f\u0642\u0627\u0626\u0642">Get Started in 5 Minutes</h2>
+      <div class="quick-start">
+        <pre><code>git clone https://github.com/Ibrahim-Abedrabboh/whatsapp-hub-free.git
+cd whatsapp-hub-free
+cp .env.example .env
+docker compose up --build</code></pre>
+        <p style="text-align: center; margin-top: 20px; color: rgba(234,255,244,0.7);" data-en="That's it! The app is running at http://localhost:3000" data-ar="\u0628\u0633! \u0627\u0644\u062a\u0637\u0628\u064a\u0642 \u064a\u0639\u0645\u0644 \u0639\u0644\u0649 http://localhost:3000">That's it! The app is running at http://localhost:3000</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2 class="section-title" data-en="Tech Stack" data-ar="\u0627\u0644\u062a\u0642\u0646\u064a\u0627\u062a \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u0629">Tech Stack</h2>
+      <div class="tech-stack">
+        <span class="tech-badge">Next.js 15</span>
+        <span class="tech-badge">TypeScript</span>
+        <span class="tech-badge">PostgreSQL</span>
+        <span class="tech-badge">Redis</span>
+        <span class="tech-badge">BullMQ</span>
+        <span class="tech-badge">Docker</span>
+        <span class="tech-badge">Meta Cloud API</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p data-en="Open source under the MIT License" data-ar="\u0645\u0634\u0631\u0648\u0639 \u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0645\u0635\u062f\u0631 \u062a\u062d\u062a \u0631\u062e\u0635\u0629 MIT">Open source under the MIT License</p>
+      <p style="margin-top: 10px;">
+        <a href="https://github.com/Ibrahim-Abedrabboh/whatsapp-hub-free">GitHub</a>
+      </p>
+      <p style="margin-top: 20px; font-size: 0.85rem;" data-en="Built for the MENA region" data-ar="\u0635\u064f\u0646\u0639 \u0628\u0640 \u2764\uFE0F \u0644\u0645\u0646\u0637\u0642\u0629 \u0627\u0644\u0634\u0631\u0642 \u0627\u0644\u0623\u0648\u0633\u0637">Built for the MENA region</p>
+    </div>
+  </footer>
+
+  <script>
+    const translations = {
+      en: {
+        'hero-title': 'WhatsApp Hub Free',
+        'hero-subtitle': 'Free, open-source, self-hosted WhatsApp messaging. Your server, your data, your rules.',
+        'btn-star': 'Star on GitHub',
+        'btn-quickstart': 'Quick Start'
+      },
+      ar: {
+        'hero-title': 'WhatsApp Hub Free',
+        'hero-subtitle': '\u0645\u0646\u0635\u0629 \u0631\u0633\u0627\u0626\u0644 \u0648\u0627\u062a\u0633\u0627\u0628 \u0645\u062c\u0627\u0646\u064a\u0629 \u0648\u0645\u0641\u062a\u0648\u062d\u0629 \u0627\u0644\u0645\u0635\u062f\u0631 \u0648\u0645\u0633\u062a\u0636\u0627\u0641\u0629 \u0630\u0627\u062a\u064a\u064b\u0627. \u062e\u0627\u062f\u0645\u0643\u060c \u0628\u064a\u0627\u0646\u0627\u062a\u0643\u060c \u0642\u0648\u0627\u0639\u062f\u0643.',
+        'btn-star': '\u2b50 \u0623\u0636\u0641 \u0646\u062c\u0645\u0629 \u0639\u0644\u0649 GitHub',
+        'btn-quickstart': '\u0627\u0628\u062f\u0623 \u0627\u0644\u0622\u0646'
+      }
+    };
+
+    function switchLang(lang) {
+      const html = document.documentElement;
+      if (lang === 'ar') {
+        html.setAttribute('lang', 'ar');
+        html.setAttribute('dir', 'rtl');
+      } else {
+        html.setAttribute('lang', 'en');
+        html.setAttribute('dir', 'ltr');
+      }
+
+      // Update toggle buttons
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('btn-ar').classList.toggle('active', lang === 'ar');
+
+      // Update elements with IDs
+      for (const [id, text] of Object.entries(translations[lang])) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+
+      // Update elements with data-en/data-ar attributes
+      document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+
+      // Update section titles
+      document.querySelectorAll('.section-title[data-' + lang + ']').forEach(el => {
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+    }
+  </script>
+</body>
+</html>
