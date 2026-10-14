@@ -1,0 +1,174 @@
+/* ============================================================
+   Broadcast Hub — Modern Dark Theme Design System
+   WhatsApp green · Arabic-first · RTL-native
+
+   Jordan/GCC public release
+   ============================================================ */
+
+:root {
+  /* ── Primary: WhatsApp Green ── */
+  --teal-500: #25d366;
+  --teal-600: #1da851;
+  --green-500: #10b981;
+  --green-600: #059669;
+
+  /* ─ Dark Backgrounds ── */
+  --bg-primary: #06140d;
+  --bg-secondary: #0c1f16;
+  --bg-tertiary: #11291d;
+  --bg-elevated: #162e22;
+
+  /* ── Text Colors ── */
+  --text-primary: #eafff4;
+  --text-secondary: #8fb1a1;
+  --text-muted: #5a7d6b;
+  --text-disabled: #3d5a4a;
+
+  /* ── Borders & Lines ── */
+  --border-primary: #1c3b2b;
+  --border-secondary: #275038;
+  --border-hover: #356a4a;
+
+  /* ── Semantic Colors ── */
+  --success: #25d366;
+  --success-bg: rgba(37, 211, 102, 0.12);
+  --warning: #fb7a1e;
+  --warning-bg: rgba(251, 122, 30, 0.12);
+  --error: #ff6b6b;
+  --error-bg: rgba(255, 107, 107, 0.12);
+  --info: #5ac8ff;
+  --info-bg: rgba(90, 200, 255, 0.12);
+
+  /* ── Gradients ── */
+  --gradient-primary: linear-gradient(135deg, #25d366 0%, #0fae8b 100%);
+  --gradient-hover: linear-gradient(135deg, #1da851 0%, #0d9478 100%);
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(37, 211, 102, 0.3);
+
+  /* ── Radii ─ */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-pill: 999px;
+
+  /* ── Typography ── */
+  --font-sans: var(--font-inter, 'Inter'), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-arabic: var(--font-cairo, 'Cairo'), 'Segoe UI', Tahoma, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ─ Spacing ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ── Transitions ── */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Z-Index ── */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+}
+
+/* ── Arabic Font Override ── */
+html[lang="ar"] {
+  --font-sans: var(--font-arabic);
+}
+
+/* ── Base Styles ── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Typography Scale ── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3rem); }
+h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+p {
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* ── Links ── */
+a {
+  color: var(--teal-500);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--green-500);
+}
+
+/* ── Focus States (WCAG 2.4.7) ─ */
+:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--teal-500);
+  color: var(--text-primary);
+}
