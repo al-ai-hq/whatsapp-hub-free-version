@@ -5,228 +5,597 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WhatsApp Hub Free — Self-hosted WhatsApp Messaging</title>
   <meta name="description" content="Free, open-source, self-hosted WhatsApp messaging platform. Upload contacts, broadcast messages, manage your inbox, build templates, and schedule recurring campaigns.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #050e09;
+      --bg2: #081a10;
+      --card: rgba(12, 31, 22, 0.6);
+      --card-border: rgba(37, 211, 102, 0.12);
+      --green: #25d366;
+      --green-light: #4ae88a;
+      --green-dark: #128c7e;
+      --teal: #0fae8b;
+      --ink: #eafff4;
+      --muted: #7da393;
+      --glow: rgba(37, 211, 102, 0.15);
+      --font-en: 'Inter', system-ui, sans-serif;
+      --font-ar: 'Cairo', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #06140d; color: #eafff4; line-height: 1.8; }
-    html[dir="rtl"] body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    /* Header */
-    header { background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); padding: 60px 0; text-align: center; position: relative; }
-    header h1 { font-size: 3rem; color: white; margin-bottom: 20px; font-weight: 700; }
-    header p { font-size: 1.3rem; color: rgba(255,255,255,0.95); max-width: 800px; margin: 0 auto 30px; }
+    html { scroll-behavior: smooth; }
 
-    /* Language toggle */
-    .lang-toggle { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; }
-    html[dir="rtl"] .lang-toggle { right: auto; left: 20px; }
-    .lang-btn { padding: 8px 16px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.5); background: transparent; color: white; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
-    .lang-btn.active { background: white; color: #25d366; border-color: white; }
-    .lang-btn:hover { background: rgba(255,255,255,0.2); }
-    .lang-btn.active:hover { background: #f0f0f0; }
+    body {
+      font-family: var(--font-en);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    html[dir="rtl"] body { font-family: var(--font-ar); }
 
-    /* CTA Buttons */
-    .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-    .btn { padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s; display: inline-block; }
-    .btn-primary { background: white; color: #25d366; }
-    .btn-primary:hover { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-    .btn-secondary { background: transparent; color: white; border: 2px solid white; }
-    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
 
-    /* Sections */
-    section { padding: 60px 0; }
-    .section-title { font-size: 2rem; text-align: center; margin-bottom: 40px; color: #25d366; }
+    /* ─── Animated background ─── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(37,211,102,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,211,102,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .bg-glow {
+      position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 600px; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse, rgba(37,211,102,0.08) 0%, transparent 70%);
+      animation: glowPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes glowPulse {
+      0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+    }
 
-    /* Stats */
-    .stats { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; padding: 40px 0; }
-    .stat { text-align: center; }
-    .stat-number { font-size: 3rem; font-weight: 700; color: #25d366; }
-    .stat-label { color: rgba(234,255,244,0.7); }
+    .orb {
+      position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0;
+      animation: orbFloat 20s ease-in-out infinite alternate;
+    }
+    .orb--1 { width: 400px; height: 400px; top: 10%; left: -100px; background: rgba(37,211,102,0.06); }
+    .orb--2 { width: 300px; height: 300px; top: 50%; right: -80px; background: rgba(15,174,139,0.05); animation-delay: -7s; animation-duration: 25s; }
+    .orb--3 { width: 250px; height: 250px; bottom: 10%; left: 20%; background: rgba(37,211,102,0.04); animation-delay: -12s; }
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0); }
+      33% { transform: translate(30px, -40px); }
+      66% { transform: translate(-20px, 20px); }
+      100% { transform: translate(10px, -10px); }
+    }
 
-    /* Features grid */
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-    .feature-card { background: rgba(37,211,102,0.05); border: 1px solid rgba(37,211,102,0.2); border-radius: 12px; padding: 30px; transition: all 0.3s; }
-    .feature-card:hover { transform: translateY(-5px); border-color: #25d366; box-shadow: 0 10px 30px rgba(37,211,102,0.1); }
-    .feature-icon { font-size: 2.5rem; margin-bottom: 15px; }
-    .feature-card h3 { font-size: 1.3rem; margin-bottom: 10px; color: #25d366; }
-    .feature-card p { color: rgba(234,255,244,0.8); }
+    /* ─── Content above background ─── */
+    header, section, footer { position: relative; z-index: 1; }
 
-    /* Quick start */
-    .quick-start { background: #0a1f14; border-radius: 12px; padding: 30px; max-width: 700px; margin: 0 auto; }
-    .quick-start pre { background: #06140d; border: 1px solid rgba(37,211,102,0.2); border-radius: 8px; padding: 20px; overflow-x: auto; direction: ltr; text-align: left; }
-    .quick-start code { color: #25d366; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+    /* ─── Navigation ─── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 0;
+      background: rgba(5, 14, 9, 0.8);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(37,211,102,0.08);
+      transition: all 0.3s;
+    }
+    .nav__inner { display: flex; align-items: center; justify-content: space-between; }
+    .nav__brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; text-decoration: none; color: var(--ink); }
+    .nav__logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      display: grid; place-items: center;
+      box-shadow: 0 0 20px rgba(37,211,102,0.3);
+    }
+    .nav__logo svg { width: 18px; height: 18px; fill: white; }
+    .nav__actions { display: flex; align-items: center; gap: 12px; }
+    .lang-toggle { display: flex; background: rgba(37,211,102,0.08); border-radius: 8px; padding: 3px; }
+    .lang-btn {
+      padding: 6px 14px; border-radius: 6px; border: none; background: transparent;
+      color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 600;
+      transition: all 0.25s; font-family: inherit;
+    }
+    .lang-btn.active { background: var(--green); color: var(--bg); }
+    .lang-btn:hover:not(.active) { color: var(--ink); }
+    .nav__cta {
+      padding: 8px 20px; border-radius: 8px; background: rgba(37,211,102,0.1);
+      border: 1px solid rgba(37,211,102,0.2); color: var(--green); font-weight: 600;
+      font-size: 13px; text-decoration: none; transition: all 0.25s;
+    }
+    .nav__cta:hover { background: rgba(37,211,102,0.2); border-color: var(--green); }
 
-    /* Tech stack */
-    .tech-stack { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 20px 0; }
-    .tech-badge { background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.3); padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; }
+    /* ─── Hero ─── */
+    header {
+      padding: 160px 0 100px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px 6px 8px; border-radius: 100px;
+      background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.15);
+      font-size: 13px; font-weight: 600; color: var(--green); margin-bottom: 32px;
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-badge__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* Use cases */
-    .use-cases { background: rgba(37,211,102,0.03); }
-    .use-case-list { list-style: none; max-width: 600px; margin: 0 auto; }
-    .use-case-list li { padding: 15px 0; border-bottom: 1px solid rgba(37,211,102,0.1); display: flex; align-items: center; gap: 15px; }
-    .use-case-list li::before { content: "\2713"; color: #25d366; font-weight: bold; font-size: 1.3rem; }
+    .hero-title {
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 900; letter-spacing: -0.03em; line-height: 1.05;
+      margin-bottom: 24px;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+    .hero-title .gradient {
+      background: linear-gradient(135deg, var(--green-light), var(--green), var(--teal));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+      color: var(--muted); max-width: 620px; margin: 0 auto 40px; line-height: 1.7;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+    .hero-actions {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+    .btn {
+      padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 15px;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
+      transition: all 0.3s; cursor: pointer; border: none; font-family: inherit;
+    }
+    .btn--primary {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: var(--bg); box-shadow: 0 0 30px rgba(37,211,102,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(37,211,102,0.35), inset 0 1px 0 rgba(255,255,255,0.15); }
+    .btn--ghost {
+      background: rgba(255,255,255,0.04); color: var(--ink);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn--ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    .btn svg { width: 18px; height: 18px; }
 
-    /* Footer */
-    footer { background: #041008; padding: 40px 0; text-align: center; color: rgba(234,255,244,0.5); }
-    footer a { color: #25d366; text-decoration: none; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-    /* Responsive */
+    /* ─── Stats bar ─── */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+      background: rgba(37,211,102,0.08); border-radius: 16px; overflow: hidden;
+      margin: -40px auto 0; max-width: 800px; position: relative; z-index: 2;
+      border: 1px solid rgba(37,211,102,0.1);
+    }
+    .stat-item {
+      padding: 28px 20px; text-align: center;
+      background: rgba(8, 26, 16, 0.9);
+      backdrop-filter: blur(10px);
+    }
+    .stat-item__value {
+      font-size: 1.6rem; font-weight: 800; color: var(--green);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-item__label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+    /* ─── Section headings ─── */
+    .section-head { text-align: center; margin-bottom: 56px; }
+    .section-tag {
+      display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--green); margin-bottom: 16px;
+      padding: 4px 14px; border-radius: 100px;
+      background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.12);
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+    }
+    .section-sub { color: var(--muted); margin-top: 12px; font-size: 1.05rem; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+    /* ─── Features ─── */
+    .features { padding: 120px 0; }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .feature-card {
+      position: relative; padding: 36px; border-radius: 16px;
+      background: var(--card); border: 1px solid var(--card-border);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: 16px;
+      background: linear-gradient(135deg, rgba(37,211,102,0.06), transparent 60%);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(37,211,102,0.25); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card__icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(37,211,102,0.15), rgba(15,174,139,0.1));
+      border: 1px solid rgba(37,211,102,0.15);
+      display: grid; place-items: center; margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+    .feature-card__icon svg { width: 22px; height: 22px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .feature-card__title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; position: relative; z-index: 1; }
+    .feature-card__desc { color: var(--muted); font-size: 0.95rem; line-height: 1.7; position: relative; z-index: 1; }
+
+    /* ─── Who is it for ─── */
+    .audience { padding: 100px 0; }
+    .audience-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 800px; margin: 0 auto; }
+    .audience-item {
+      display: flex; align-items: flex-start; gap: 14px; padding: 20px 24px;
+      border-radius: 12px; background: rgba(37,211,102,0.03);
+      border: 1px solid rgba(37,211,102,0.08);
+      transition: all 0.3s;
+    }
+    .audience-item:hover { background: rgba(37,211,102,0.06); border-color: rgba(37,211,102,0.15); }
+    .audience-item__check {
+      flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px;
+      background: rgba(37,211,102,0.12); display: grid; place-items: center; margin-top: 2px;
+    }
+    .audience-item__check svg { width: 14px; height: 14px; stroke: var(--green); fill: none; stroke-width: 2.5; }
+    .audience-item__text { font-size: 0.95rem; font-weight: 500; }
+
+    /* ─── Quick start ─── */
+    .quickstart { padding: 100px 0; }
+    .terminal {
+      max-width: 640px; margin: 0 auto; border-radius: 16px; overflow: hidden;
+      border: 1px solid rgba(37,211,102,0.15);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(37,211,102,0.05);
+    }
+    .terminal__bar {
+      display: flex; align-items: center; gap: 8px; padding: 14px 18px;
+      background: rgba(12,31,22,0.9); border-bottom: 1px solid rgba(37,211,102,0.1);
+    }
+    .terminal__dot { width: 12px; height: 12px; border-radius: 50%; }
+    .terminal__dot--r { background: #ff5f57; }
+    .terminal__dot--y { background: #febc2e; }
+    .terminal__dot--g { background: #28c840; }
+    .terminal__title { flex: 1; text-align: center; font-size: 12px; color: var(--muted); font-weight: 500; }
+    .terminal__body {
+      background: rgba(5,14,9,0.95); padding: 24px; direction: ltr; text-align: left;
+    }
+    .terminal__line { display: flex; gap: 10px; margin-bottom: 6px; font-family: var(--font-mono); font-size: 14px; line-height: 1.8; }
+    .terminal__prompt { color: var(--green); user-select: none; flex-shrink: 0; }
+    .terminal__cmd { color: var(--ink); }
+    .terminal__note {
+      text-align: center; margin-top: 24px; color: var(--muted); font-size: 0.9rem;
+    }
+    .terminal__note strong { color: var(--green); }
+
+    /* ─── Tech stack ─── */
+    .stack { padding: 100px 0; }
+    .stack-grid { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .stack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 10px;
+      background: rgba(37,211,102,0.04); border: 1px solid rgba(37,211,102,0.1);
+      font-size: 14px; font-weight: 600; color: var(--ink);
+      transition: all 0.3s;
+    }
+    .stack-badge:hover { background: rgba(37,211,102,0.08); border-color: rgba(37,211,102,0.2); transform: translateY(-2px); }
+    .stack-badge__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+    /* ─── CTA ─── */
+    .cta-section { padding: 80px 0 120px; }
+    .cta-box {
+      text-align: center; padding: 64px 40px; border-radius: 24px;
+      background: linear-gradient(135deg, rgba(37,211,102,0.08), rgba(15,174,139,0.04));
+      border: 1px solid rgba(37,211,102,0.12);
+      position: relative; overflow: hidden;
+    }
+    .cta-box::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 50% 50%, rgba(37,211,102,0.06), transparent 50%);
+      animation: ctaGlow 6s ease-in-out infinite alternate;
+    }
+    @keyframes ctaGlow { 0% { transform: scale(0.8); } 100% { transform: scale(1.2); } }
+    .cta-box > * { position: relative; z-index: 1; }
+    .cta-box__title { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 800; margin-bottom: 12px; }
+    .cta-box__sub { color: var(--muted); margin-bottom: 32px; font-size: 1.05rem; }
+
+    /* ─── Footer ─── */
+    footer {
+      padding: 40px 0; text-align: center;
+      border-top: 1px solid rgba(37,211,102,0.08);
+    }
+    footer p { color: var(--muted); font-size: 0.85rem; }
+    footer a { color: var(--green); text-decoration: none; font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
+    .footer-heart { margin-top: 12px; font-size: 0.8rem; }
+
+    /* ─── Scroll animations ─── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Responsive ─── */
     @media (max-width: 768px) {
-      header h1 { font-size: 2rem; }
-      .stats { gap: 30px; }
+      header { padding: 130px 0 80px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .audience-grid { grid-template-columns: 1fr; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); margin: -20px 16px 0; }
+      .nav__cta { display: none; }
+    }
+    @media (max-width: 480px) {
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .btn { width: 100%; justify-content: center; max-width: 280px; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="lang-toggle">
-      <button class="lang-btn active" id="btn-en" onclick="switchLang('en')">EN</button>
-      <button class="lang-btn" id="btn-ar" onclick="switchLang('ar')">AR</button>
+  <!-- Background effects -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="orb orb--1"></div>
+  <div class="orb orb--2"></div>
+  <div class="orb orb--3"></div>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="#" class="nav__brand">
+        <div class="nav__logo">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.74.45 3.38 1.24 4.81L2 22l5.19-1.24C8.62 21.55 10.26 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.56 0-3.04-.37-4.35-1.03l-.31-.18-3.07.73.73-3.07-.18-.31A7.96 7.96 0 014 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"/></svg>
+        </div>
+        <span data-en="WhatsApp Hub Free" data-ar="WhatsApp Hub Free">WhatsApp Hub Free</span>
+      </a>
+      <div class="nav__actions">
+        <div class="lang-toggle">
+          <button class="lang-btn active" id="btn-en" onclick="switchLang('en')">EN</button>
+          <button class="lang-btn" id="btn-ar" onclick="switchLang('ar')">AR</button>
+        </div>
+        <a href="https://github.com/al-ai-hq/whatsapp-hub-free-version" class="nav__cta" id="nav-github" data-en="GitHub" data-ar="GitHub">GitHub</a>
+      </div>
     </div>
+  </nav>
+
+  <!-- Hero -->
+  <header>
     <div class="container">
-      <h1 id="hero-title">WhatsApp Hub Free</h1>
-      <p id="hero-subtitle">Free, open-source, self-hosted WhatsApp messaging. Your server, your data, your rules.</p>
-      <div class="cta-buttons">
-        <a href="https://github.com/Ibrahim-Abedrabboh/whatsapp-hub-free" class="btn btn-primary" id="btn-star">Star on GitHub</a>
-        <a href="#quick-start" class="btn btn-secondary" id="btn-quickstart">Quick Start</a>
+      <div class="hero-badge">
+        <span class="hero-badge__dot"></span>
+        <span data-en="Open Source &middot; MIT License" data-ar="مفتوح المصدر &middot; رخصة MIT">Open Source &middot; MIT License</span>
+      </div>
+      <h1 class="hero-title">
+        <span data-en="Your WhatsApp," data-ar="واتساب الخاص بك،">Your WhatsApp,</span><br>
+        <span class="gradient" data-en="Your Infrastructure" data-ar="بنيتك التحتية">Your Infrastructure</span>
+      </h1>
+      <p class="hero-sub" data-en="Free, self-hosted WhatsApp messaging platform. Broadcast to thousands, manage conversations, build templates, and automate campaigns — all on your own server." data-ar="منصة رسائل واتساب مجانية ومستضافة ذاتيًا. أرسل رسائل جماعية لآلاف المستلمين، أدِر المحادثات، ابنِ القوالب، وأتمت الحملات — كل ذلك على خادمك الخاص.">Free, self-hosted WhatsApp messaging platform. Broadcast to thousands, manage conversations, build templates, and automate campaigns — all on your own server.</p>
+      <div class="hero-actions">
+        <a href="https://github.com/al-ai-hq/whatsapp-hub-free-version" class="btn btn--primary" id="btn-star">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span data-en="Star on GitHub" data-ar="أضف نجمة على GitHub">Star on GitHub</span>
+        </a>
+        <a href="#quick-start" class="btn btn--ghost" id="btn-quickstart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          <span data-en="Quick Start" data-ar="ابدأ الآن">Quick Start</span>
+        </a>
       </div>
     </div>
   </header>
 
-  <section>
-    <div class="container">
-      <div class="stats">
-        <div class="stat"><div class="stat-number">MIT</div><div class="stat-label" data-en="Open Source" data-ar="\u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0645\u0635\u062f\u0631">Open Source</div></div>
-        <div class="stat"><div class="stat-number">100%</div><div class="stat-label" data-en="Self-hosted" data-ar="\u0627\u0633\u062a\u0636\u0627\u0641\u0629 \u0630\u0627\u062a\u064a\u0629">Self-hosted</div></div>
-        <div class="stat"><div class="stat-number">AR/EN</div><div class="stat-label" data-en="Bilingual" data-ar="\u062b\u0646\u0627\u0626\u064a \u0627\u0644\u0644\u063a\u0629">Bilingual</div></div>
-        <div class="stat"><div class="stat-number">Free</div><div class="stat-label" data-en="Forever" data-ar="\u0645\u062c\u0627\u0646\u064a \u0644\u0644\u0623\u0628\u062f">Forever</div></div>
+  <!-- Stats -->
+  <div class="container">
+    <div class="stats-bar reveal">
+      <div class="stat-item">
+        <div class="stat-item__value">MIT</div>
+        <div class="stat-item__label" data-en="Open Source" data-ar="مفتوح المصدر">Open Source</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-item__value">100%</div>
+        <div class="stat-item__label" data-en="Self-hosted" data-ar="استضافة ذاتية">Self-hosted</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-item__value">EN/AR</div>
+        <div class="stat-item__label" data-en="Bilingual" data-ar="ثنائي اللغة">Bilingual</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-item__value">$0</div>
+        <div class="stat-item__label" data-en="Forever Free" data-ar="مجاني للأبد">Forever Free</div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section>
+  <!-- Features -->
+  <section class="features">
     <div class="container">
-      <h2 class="section-title" data-en="Key Features" data-ar="\u0627\u0644\u0645\u0645\u064a\u0632\u0627\u062a \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629">Key Features</h2>
+      <div class="section-head reveal">
+        <span class="section-tag" data-en="Features" data-ar="المميزات">Features</span>
+        <h2 class="section-title" data-en="Everything you need to message at scale" data-ar="كل ما تحتاجه للمراسلة على نطاق واسع">Everything you need to message at scale</h2>
+        <p class="section-sub" data-en="Four powerful modules that cover your entire WhatsApp messaging workflow." data-ar="أربع وحدات قوية تغطي سير عمل مراسلة واتساب بالكامل.">Four powerful modules that cover your entire WhatsApp messaging workflow.</p>
+      </div>
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">\ud83d\udce4</div>
-          <h3 data-en="Contact Upload & Broadcast" data-ar="\u0631\u0641\u0639 \u062c\u0647\u0627\u062a \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0648\u0627\u0644\u0628\u062b">Contact Upload & Broadcast</h3>
-          <p data-en="Upload CSV contacts and send bulk messages to thousands of recipients. Track delivery, read receipts, and campaign performance in real time." data-ar="\u0627\u0631\u0641\u0639 \u062c\u0647\u0627\u062a \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0645\u0646 \u0645\u0644\u0641\u0627\u062a CSV \u0648\u0623\u0631\u0633\u0644 \u0631\u0633\u0627\u0626\u0644 \u062c\u0645\u0627\u0639\u064a\u0629 \u0644\u0622\u0644\u0627\u0641 \u0627\u0644\u0645\u0633\u062a\u0644\u0645\u064a\u0646. \u062a\u062a\u0628\u0639 \u0627\u0644\u062a\u0633\u0644\u064a\u0645 \u0648\u0625\u064a\u0635\u0627\u0644\u0627\u062a \u0627\u0644\u0642\u0631\u0627\u0621\u0629 \u0648\u0623\u062f\u0627\u0621 \u0627\u0644\u062d\u0645\u0644\u0627\u062a \u0641\u064a \u0627\u0644\u0648\u0642\u062a \u0627\u0644\u0641\u0639\u0644\u064a.">Upload CSV contacts and send bulk messages to thousands of recipients. Track delivery, read receipts, and campaign performance in real time.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3 class="feature-card__title" data-en="Contact Upload & Broadcast" data-ar="رفع جهات الاتصال والبث">Contact Upload & Broadcast</h3>
+          <p class="feature-card__desc" data-en="Upload CSV contacts and send bulk messages to thousands of recipients. Track delivery, read receipts, and campaign performance in real time." data-ar="ارفع جهات الاتصال من ملفات CSV وأرسل رسائل جماعية لآلاف المستلمين. تتبع التسليم وإيصالات القراءة وأداء الحملات في الوقت الفعلي.">Upload CSV contacts and send bulk messages to thousands of recipients. Track delivery, read receipts, and campaign performance in real time.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">\ud83d\udcac</div>
-          <h3 data-en="Two-way Inbox" data-ar="\u0635\u0646\u062f\u0648\u0642 \u0648\u0627\u0631\u062f \u062b\u0646\u0627\u0626\u064a \u0627\u0644\u0627\u062a\u062c\u0627\u0647">Two-way Inbox</h3>
-          <p data-en="Receive and reply to messages in a live conversation view. Manage the 24-hour service window, send media, and keep your customers engaged." data-ar="\u0627\u0633\u062a\u0642\u0628\u0644 \u0627\u0644\u0631\u0633\u0627\u0626\u0644 \u0648\u0631\u062f \u0639\u0644\u064a\u0647\u0627 \u0641\u064a \u0639\u0631\u0636 \u0645\u062d\u0627\u062f\u062b\u0627\u062a \u062d\u064a. \u0623\u062f\u0631 \u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u062e\u062f\u0645\u0629 24 \u0633\u0627\u0639\u0629\u060c \u0623\u0631\u0633\u0644 \u0648\u0633\u0627\u0626\u0637\u060c \u0648\u0627\u0628\u0642 \u0639\u0644\u0649 \u062a\u0648\u0627\u0635\u0644 \u0645\u0639 \u0639\u0645\u0644\u0627\u0626\u0643.">Receive and reply to messages in a live conversation view. Manage the 24-hour service window, send media, and keep your customers engaged.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          </div>
+          <h3 class="feature-card__title" data-en="Two-way Inbox" data-ar="صندوق وارد ثنائي الاتجاه">Two-way Inbox</h3>
+          <p class="feature-card__desc" data-en="Receive and reply to messages in a live conversation view. Manage the 24-hour service window, send media, and keep your customers engaged." data-ar="استقبل الرسائل ورد عليها في عرض محادثات حي. أدِر نافذة الخدمة 24 ساعة، أرسل وسائط، وابقي على تواصل مع عملائك.">Receive and reply to messages in a live conversation view. Manage the 24-hour service window, send media, and keep your customers engaged.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">\ud83c\udfa8</div>
-          <h3 data-en="Template Builder" data-ar="\u0628\u0646\u0627\u0621 \u0627\u0644\u0642\u0648\u0627\u0644\u0628">Template Builder</h3>
-          <p data-en="Design rich message templates with media headers, coupon codes, carousels, and interactive buttons (call, URL, quick reply). Preview before sending." data-ar="\u0635\u0645\u0645 \u0642\u0648\u0627\u0644\u0628 \u0631\u0633\u0627\u0626\u0644 \u063a\u0646\u064a\u0629 \u0628\u0631\u0624\u0648\u0633 \u0648\u0633\u0627\u0626\u0637\u060c \u0623\u0643\u0648\u0627\u062f \u0643\u0648\u0628\u0648\u0646\u060c \u0634\u0631\u0627\u0626\u0637 \u0639\u0631\u0636\u060c \u0648\u0623\u0632\u0631\u0627\u0631 \u062a\u0641\u0627\u0639\u0644\u064a\u0629 (\u0627\u062a\u0635\u0627\u0644\u060c URL\u060c \u0631\u062f \u0633\u0631\u064a\u0639). \u0639\u0627\u064a\u0646 \u0642\u0628\u0644 \u0627\u0644\u0625\u0631\u0633\u0627\u0644.">Design rich message templates with media headers, coupon codes, carousels, and interactive buttons (call, URL, quick reply). Preview before sending.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+          <h3 class="feature-card__title" data-en="Template Builder" data-ar="بناء القوالب">Template Builder</h3>
+          <p class="feature-card__desc" data-en="Design rich message templates with media headers, coupon codes, carousels, and interactive buttons. Preview before submitting to Meta." data-ar="صمم قوالب رسائل غنية برؤوس وسائط، أكواد كوبون، شرائط عرض، وأزرار تفاعلية. عاين قبل الإرسال.">Design rich message templates with media headers, coupon codes, carousels, and interactive buttons. Preview before submitting to Meta.</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">\ud83d\udcc5</div>
-          <h3 data-en="Recurring Campaigns" data-ar="\u062d\u0645\u0644\u0627\u062a \u0645\u062a\u0643\u0631\u0631\u0629">Recurring Campaigns</h3>
-          <p data-en="Schedule campaigns to run on a recurring basis. Set it and forget it — automated messaging on your schedule with pause/resume controls." data-ar="\u062c\u062f\u0648\u0644 \u0627\u0644\u062d\u0645\u0644\u0627\u062a \u0644\u062a\u0639\u0645\u0644 \u0628\u0634\u0643\u0644 \u0645\u062a\u0643\u0631\u0631. \u0636\u0639\u0647\u0627 \u0648\u0627\u0646\u0633\u0647\u0627 \u2014 \u0631\u0633\u0627\u0626\u0644 \u062a\u0644\u0642\u0627\u0626\u064a\u0629 \u062d\u0633\u0628 \u062c\u062f\u0648\u0644\u0643 \u0645\u0639 \u0623\u062f\u0648\u0627\u062a \u0625\u064a\u0642\u0627\u0641/\u0627\u0633\u062a\u0626\u0646\u0627\u0641.">Schedule campaigns to run on a recurring basis. Set it and forget it — automated messaging on your schedule with pause/resume controls.</p>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+          </div>
+          <h3 class="feature-card__title" data-en="Recurring Campaigns" data-ar="حملات متكررة">Recurring Campaigns</h3>
+          <p class="feature-card__desc" data-en="Schedule campaigns to run on a recurring basis. Set it and forget it — automated messaging on your schedule with pause/resume controls." data-ar="جدول الحملات لتعمل بشكل متكرر. ضعها وانسها — رسائل تلقائية حسب جدولك مع أدوات إيقاف/استئناف.">Schedule campaigns to run on a recurring basis. Set it and forget it — automated messaging on your schedule with pause/resume controls.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="use-cases">
+  <!-- Audience -->
+  <section class="audience">
     <div class="container">
-      <h2 class="section-title" data-en="Who Is It For?" data-ar="\u0644\u0645\u0646 \u0647\u0630\u0627 \u0627\u0644\u0645\u0634\u0631\u0648\u0639\u061f">Who Is It For?</h2>
-      <ul class="use-case-list">
-        <li data-en="Small businesses managing their own WhatsApp" data-ar="\u0627\u0644\u0634\u0631\u0643\u0627\u062a \u0627\u0644\u0635\u063a\u064a\u0631\u0629 \u0627\u0644\u062a\u064a \u062a\u062f\u064a\u0631 \u0648\u0627\u062a\u0633\u0627\u0628 \u0628\u0646\u0641\u0633\u0647\u0627">Small businesses managing their own WhatsApp</li>
-        <li data-en="Developers who want full control over their messaging stack" data-ar="\u0627\u0644\u0645\u0637\u0648\u0631\u064a\u0646 \u0627\u0644\u0630\u064a\u0646 \u064a\u0631\u064a\u062f\u0648\u0646 \u062a\u062d\u0643\u0645\u0627\u064b \u0643\u0627\u0645\u0644\u0627\u064b \u0641\u064a \u0628\u064a\u0626\u0629 \u0627\u0644\u0631\u0633\u0627\u0626\u0644">Developers who want full control over their messaging stack</li>
-        <li data-en="Anyone who wants a free alternative to paid WhatsApp APIs" data-ar="\u0623\u064a \u0634\u062e\u0635 \u064a\u0631\u064a\u062f \u0628\u062f\u064a\u0644\u0627\u064b \u0645\u062c\u0627\u0646\u064a\u0627\u064b \u0644\u0648\u0627\u062c\u0647\u0627\u062a WhatsApp \u0627\u0644\u0645\u062f\u0641\u0648\u0639\u0629">Anyone who wants a free alternative to paid WhatsApp APIs</li>
-        <li data-en="Teams that need data sovereignty and self-hosting" data-ar="\u0627\u0644\u0641\u0631\u0642 \u0627\u0644\u062a\u064a \u062a\u062d\u062a\u0627\u062c \u0633\u064a\u0627\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0648\u0627\u0644\u0627\u0633\u062a\u0636\u0627\u0641\u0629 \u0627\u0644\u0630\u0627\u062a\u064a\u0629">Teams that need data sovereignty and self-hosting</li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="quick-start">
-    <div class="container">
-      <h2 class="section-title" data-en="Get Started in 5 Minutes" data-ar="\u0627\u0628\u062f\u0623 \u0641\u064a 5 \u062f\u0642\u0627\u0626\u0642">Get Started in 5 Minutes</h2>
-      <div class="quick-start">
-        <pre><code>git clone https://github.com/Ibrahim-Abedrabboh/whatsapp-hub-free.git
-cd whatsapp-hub-free
-cp .env.example .env
-docker compose up --build</code></pre>
-        <p style="text-align: center; margin-top: 20px; color: rgba(234,255,244,0.7);" data-en="That's it! The app is running at http://localhost:3000" data-ar="\u0628\u0633! \u0627\u0644\u062a\u0637\u0628\u064a\u0642 \u064a\u0639\u0645\u0644 \u0639\u0644\u0649 http://localhost:3000">That's it! The app is running at http://localhost:3000</p>
+      <div class="section-head reveal">
+        <span class="section-tag" data-en="Use Cases" data-ar="حالات الاستخدام">Use Cases</span>
+        <h2 class="section-title" data-en="Built for people who value control" data-ar="مبني للأشخاص الذين يقدرون التحكم">Built for people who value control</h2>
+      </div>
+      <div class="audience-grid">
+        <div class="audience-item reveal">
+          <div class="audience-item__check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="audience-item__text" data-en="Small businesses managing their own WhatsApp communication" data-ar="الشركات الصغيرة التي تدير واتساب بنفسها">Small businesses managing their own WhatsApp communication</span>
+        </div>
+        <div class="audience-item reveal">
+          <div class="audience-item__check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="audience-item__text" data-en="Developers who want full control over their messaging stack" data-ar="المطورين الذين يريدون تحكمًا كاملاً في بيئة الرسائل">Developers who want full control over their messaging stack</span>
+        </div>
+        <div class="audience-item reveal">
+          <div class="audience-item__check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="audience-item__text" data-en="Teams replacing expensive SaaS messaging tools" data-ar="الفرق التي تستبدل أدوات الرسائل المكلفة">Teams replacing expensive SaaS messaging tools</span>
+        </div>
+        <div class="audience-item reveal">
+          <div class="audience-item__check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="audience-item__text" data-en="Organizations that need data sovereignty and self-hosting" data-ar="المؤسسات التي تحتاج سيادة البيانات والاستضافة الذاتية">Organizations that need data sovereignty and self-hosting</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <section>
+  <!-- Quick Start -->
+  <section class="quickstart" id="quick-start">
     <div class="container">
-      <h2 class="section-title" data-en="Tech Stack" data-ar="\u0627\u0644\u062a\u0642\u0646\u064a\u0627\u062a \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u0629">Tech Stack</h2>
-      <div class="tech-stack">
-        <span class="tech-badge">Next.js 15</span>
-        <span class="tech-badge">TypeScript</span>
-        <span class="tech-badge">PostgreSQL</span>
-        <span class="tech-badge">Redis</span>
-        <span class="tech-badge">BullMQ</span>
-        <span class="tech-badge">Docker</span>
-        <span class="tech-badge">Meta Cloud API</span>
+      <div class="section-head reveal">
+        <span class="section-tag" data-en="Quick Start" data-ar="ابدأ بسرعة">Quick Start</span>
+        <h2 class="section-title" data-en="Up and running in 5 minutes" data-ar="جاهز في 5 دقائق">Up and running in 5 minutes</h2>
+        <p class="section-sub" data-en="Clone, configure, and launch with Docker. That's the whole setup." data-ar="استنسخ، إعداد، وأطلق باستخدام Docker. هذا كل الإعداد.">Clone, configure, and launch with Docker. That's the whole setup.</p>
+      </div>
+      <div class="terminal reveal">
+        <div class="terminal__bar">
+          <span class="terminal__dot terminal__dot--r"></span>
+          <span class="terminal__dot terminal__dot--y"></span>
+          <span class="terminal__dot terminal__dot--g"></span>
+          <span class="terminal__title">Terminal</span>
+        </div>
+        <div class="terminal__body">
+          <div class="terminal__line"><span class="terminal__prompt">$</span><span class="terminal__cmd">git clone https://github.com/al-ai-hq/whatsapp-hub-free-version.git</span></div>
+          <div class="terminal__line"><span class="terminal__prompt">$</span><span class="terminal__cmd">cd whatsapp-hub-free-version</span></div>
+          <div class="terminal__line"><span class="terminal__prompt">$</span><span class="terminal__cmd">cp .env.example .env</span></div>
+          <div class="terminal__line"><span class="terminal__prompt">$</span><span class="terminal__cmd">docker compose up --build</span></div>
+        </div>
+      </div>
+      <p class="terminal__note reveal" data-en="That's it! App running at <strong>localhost:3000</strong>" data-ar="بس! التطبيق يعمل على <strong>localhost:3000</strong>">That's it! App running at <strong>localhost:3000</strong></p>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="stack">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="section-tag" data-en="Tech Stack" data-ar="التقنيات">Tech Stack</span>
+        <h2 class="section-title" data-en="Modern, proven technologies" data-ar="تقنيات حديثة ومجربة">Modern, proven technologies</h2>
+      </div>
+      <div class="stack-grid reveal">
+        <span class="stack-badge"><span class="stack-badge__dot"></span>Next.js 15</span>
+        <span class="stack-badge"><span class="stack-badge__dot"></span>TypeScript</span>
+        <span class="stack-badge"><span class="stack-badge__dot"></span>PostgreSQL 16</span>
+        <span class="stack-badge"><span class="stack-badge__dot"></span>Redis 7</span>
+        <span class="stack-badge"><span class="stack-badge__dot"></span>BullMQ</span>
+        <span class="stack-badge"><span class="stack-badge__dot"></span>Docker</span>
+        <span class="stack-badge"><span class="stack-badge__dot"></span>Meta Cloud API</span>
       </div>
     </div>
   </section>
 
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-box reveal">
+        <h2 class="cta-box__title" data-en="Ready to take control of your messaging?" data-ar="مستعد للتحكم في رسائلك؟">Ready to take control of your messaging?</h2>
+        <p class="cta-box__sub" data-en="Star the repo, fork it, or contribute. Built for the MENA region and beyond." data-ar="أضف نجمة، انسخ المشروع، أو ساهم. صُنع لمنطقة الشرق الأوسط وما بعدها.">Star the repo, fork it, or contribute. Built for the MENA region and beyond.</p>
+        <a href="https://github.com/al-ai-hq/whatsapp-hub-free-version" class="btn btn--primary">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span data-en="Star on GitHub" data-ar="أضف نجمة على GitHub">Star on GitHub</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer>
     <div class="container">
-      <p data-en="Open source under the MIT License" data-ar="\u0645\u0634\u0631\u0648\u0639 \u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0645\u0635\u062f\u0631 \u062a\u062d\u062a \u0631\u062e\u0635\u0629 MIT">Open source under the MIT License</p>
-      <p style="margin-top: 10px;">
-        <a href="https://github.com/Ibrahim-Abedrabboh/whatsapp-hub-free">GitHub</a>
-      </p>
-      <p style="margin-top: 20px; font-size: 0.85rem;" data-en="Built for the MENA region" data-ar="\u0635\u064f\u0646\u0639 \u0628\u0640 \u2764\uFE0F \u0644\u0645\u0646\u0637\u0642\u0629 \u0627\u0644\u0634\u0631\u0642 \u0627\u0644\u0623\u0648\u0633\u0637">Built for the MENA region</p>
+      <p data-en="Open source under the MIT License" data-ar="مشروع مفتوح المصدر تحت رخصة MIT">Open source under the MIT License</p>
+      <p style="margin-top: 8px;"><a href="https://github.com/al-ai-hq/whatsapp-hub-free-version">GitHub</a></p>
+      <p class="footer-heart" data-en="Built with care for the MENA region" data-ar="صُنع بعناية لمنطقة الشرق الأوسط">Built with care for the MENA region</p>
     </div>
   </footer>
 
   <script>
+    // Language switching
     const translations = {
       en: {
-        'hero-title': 'WhatsApp Hub Free',
-        'hero-subtitle': 'Free, open-source, self-hosted WhatsApp messaging. Your server, your data, your rules.',
         'btn-star': 'Star on GitHub',
-        'btn-quickstart': 'Quick Start'
+        'btn-quickstart': 'Quick Start',
+        'nav-github': 'GitHub'
       },
       ar: {
-        'hero-title': 'WhatsApp Hub Free',
-        'hero-subtitle': '\u0645\u0646\u0635\u0629 \u0631\u0633\u0627\u0626\u0644 \u0648\u0627\u062a\u0633\u0627\u0628 \u0645\u062c\u0627\u0646\u064a\u0629 \u0648\u0645\u0641\u062a\u0648\u062d\u0629 \u0627\u0644\u0645\u0635\u062f\u0631 \u0648\u0645\u0633\u062a\u0636\u0627\u0641\u0629 \u0630\u0627\u062a\u064a\u064b\u0627. \u062e\u0627\u062f\u0645\u0643\u060c \u0628\u064a\u0627\u0646\u0627\u062a\u0643\u060c \u0642\u0648\u0627\u0639\u062f\u0643.',
-        'btn-star': '\u2b50 \u0623\u0636\u0641 \u0646\u062c\u0645\u0629 \u0639\u0644\u0649 GitHub',
-        'btn-quickstart': '\u0627\u0628\u062f\u0623 \u0627\u0644\u0622\u0646'
+        'btn-star': 'أضف نجمة على GitHub',
+        'btn-quickstart': 'ابدأ الآن',
+        'nav-github': 'GitHub'
       }
     };
 
     function switchLang(lang) {
       const html = document.documentElement;
-      if (lang === 'ar') {
-        html.setAttribute('lang', 'ar');
-        html.setAttribute('dir', 'rtl');
-      } else {
-        html.setAttribute('lang', 'en');
-        html.setAttribute('dir', 'ltr');
-      }
+      html.setAttribute('lang', lang);
+      html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
 
-      // Update toggle buttons
       document.getElementById('btn-en').classList.toggle('active', lang === 'en');
       document.getElementById('btn-ar').classList.toggle('active', lang === 'ar');
 
-      // Update elements with IDs
       for (const [id, text] of Object.entries(translations[lang])) {
         const el = document.getElementById(id);
-        if (el) el.textContent = text;
+        if (el) {
+          const span = el.querySelector('span[data-' + lang + ']');
+          if (span) span.textContent = span.getAttribute('data-' + lang);
+          else el.textContent = text;
+        }
       }
 
-      // Update elements with data-en/data-ar attributes
       document.querySelectorAll('[data-' + lang + ']').forEach(el => {
-        el.textContent = el.getAttribute('data-' + lang);
-      });
-
-      // Update section titles
-      document.querySelectorAll('.section-title[data-' + lang + ']').forEach(el => {
+        if (el.id && translations[lang][el.id]) return;
+        if (el.tagName === 'SPAN' && el.closest('.btn, .nav__brand, .nav__cta')) return;
         el.textContent = el.getAttribute('data-' + lang);
       });
     }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   </script>
 </body>
 </html>
