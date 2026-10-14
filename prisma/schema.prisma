@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  tokenVersion Int      @default(1)
+  createdAt    DateTime @default(now())
+}
+
+model WhatsAppConfig {
+  id                 String   @id @default("default")
+  phoneNumberId      String?
+  businessAccountId  String?
+  appId              String?
+  accessToken        String?
+  appSecret          String?
+  webhookVerifyToken String?
+  graphApiVersion    String?
+  updatedAt          DateTime @updatedAt
+}
+
+model Contact {
+  id         String   @id @default(cuid())
+  phone      String   @unique
+  name       String?
+  attributes Json     @default("{}")
+  optedOut   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  memberships   ContactListMembership[]
+  recipients    BroadcastRecipient[]
+  conversations Conversation[]
+
+  @@index([optedOut])
+}
+
+model ContactList {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  memberships ContactListMembership[]
+  broadcasts  Broadcast[]
+  snapshots   ContactListSnapshot[]
+}
+
+model ContactListSnapshot {
+  id          String      @id @default(cuid())
+  list        ContactList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId      String
+  listName    String
+  memberIds   Json
+  memberCount Int
+  reason      String      @default("manual")
+  createdAt   DateTime    @default(now())
+
+  @@index([listId])
+}
+
+model ContactListMembership {
+  contact   Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId String
+  list      ContactList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId    String
+  addedAt   DateTime    @default(now())
+
+  @@id([contactId, listId])
+  @@index([listId])
+}
+
+model Template {
+  id            String   @id @default(cuid())
+  name          String
+  language      String   @default("en")
+  category      String
+  variableCount Int      @default(0)
+  headerFormat  String?
+  copyCode      Boolean  @default(false)
+  ltoText       String?
+  ltoExpiration Boolean  @default(false)
+  cards         Json?
+  bodyText      String?
+  footerText    String?
+  buttons       Json?
+  status        String   @default("APPROVED")
+  createdAt     DateTime @default(now())
+
+  broadcasts Broadcast[]
+
+  @@unique([name, language])
+}
+
+model Broadcast {
+  id             String        @id @default(cuid())
+  template       Template      @relation(fields: [templateId], references: [id])
+  templateId     String
+  list           ContactList   @relation(fields: [listId], references: [id])
+  listId         String
+  status         BroadcastStatus @default(DRAFT)
+  totalCount     Int           @default(0)
+  sentCount      Int           @default(0)
+  failedCount    Int           @default(0)
+  variableMap    Json          @default("[]")
+  headerMediaUrl String?
+  couponCode     String?
+  cardMediaUrls  Json?
+  ltoExpiresAt   DateTime?
+  scheduledAt    DateTime?
+  createdAt      DateTime      @default(now())
+  startedAt      DateTime?
+  completedAt    DateTime?
+
+  recipients BroadcastRecipient[]
+
+  @@index([status])
+}
+
+enum BroadcastStatus {
+  DRAFT
+  SCHEDULED
+  QUEUED
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+model BroadcastRecipient {
+  id          String          @id @default(cuid())
+  broadcast   Broadcast       @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  broadcastId String
+  contact     Contact         @relation(fields: [contactId], references: [id])
+  contactId   String
+  wamid       String?         @unique
+  status      RecipientStatus @default(PENDING)
+  error       String?
+  updatedAt   DateTime        @updatedAt
+
+  events MessageEvent[]
+
+  @@unique([broadcastId, contactId])
+  @@index([status])
+}
+
+enum RecipientStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model MessageEvent {
+  id          String            @id @default(cuid())
+  recipient   BroadcastRecipient? @relation(fields: [recipientId], references: [id])
+  recipientId String?
+  wamid       String?
+  type        String
+  payload     Json
+  createdAt   DateTime @default(now())
+
+  @@index([wamid])
+}
+
+model RecurringCampaign {
+  id          String   @id @default(cuid())
+  name        String
+  templateId  String
+  listId      String
+  variableMap Json     @default("[]")
+  cron        String
+  active      Boolean  @default(true)
+  lastRunAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([active])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  target    String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  phone         String    @unique
+  contact       Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId     String?
+  lastInboundAt DateTime?
+  lastMessageAt DateTime  @default(now())
+  lastPreview   String?
+  unread        Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  messages Message[]
+
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  direction      String
+  type           String       @default("text")
+  text           String?
+  mediaId        String?
+  mediaMime      String?
+  mediaFilename  String?
+  wamid          String?      @unique
+  status         String?
+  error          String?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([wamid])
+}
+
+model OptOut {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  source    String   @default("keyword")
+  createdAt DateTime @default(now())
+}
+
+model RedirectLink {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
