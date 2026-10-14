@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseSlug, isAllowedDestination } from "./links";
 
 // E.164 without leading '+', 8–15 digits (covers KSA/Kuwait/Qatar/Jordan, etc.)
 export const PhoneSchema = z
@@ -268,6 +269,25 @@ export const SendMessageSchema = z.object({
 export const SendTemplateMessageSchema = z.object({
   templateId: z.string().min(1),
   variables: z.array(z.string().trim().max(1024)).max(20).default([]),
+});
+
+export const CreateRedirectSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .refine((s) => parseSlug(s) !== null, "Slug: 2–64 lowercase letters, numbers, or inner hyphens")
+    .transform((s) => parseSlug(s)!),
+  url: z
+    .string()
+    .trim()
+    .refine(isAllowedDestination, "Destination must be a full http:// or https:// address"),
+});
+
+export const UpdateRedirectSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .refine(isAllowedDestination, "Destination must be a full http:// or https:// address"),
 });
 
 // Inbound webhook payload — only the fields we consume, validated defensively.
