@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, ACCESS_COOKIE } from "@/lib/auth";
 
 const PUBLIC_PREFIXES = [
-  "/login", "/api/auth", "/api/webhooks", "/api/health", "/go",
+  "/login", "/api/auth", "/api/webhooks", "/api/health", "/api/leads", "/go",
 ];
 const PUBLIC_EXACT = new Set(["/", "/contacts-template.csv"]);
 
