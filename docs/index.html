@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WhatsApp Hub Free — Self-hosted WhatsApp Messaging</title>
   <meta name="description" content="Free, open-source, self-hosted WhatsApp messaging platform. Upload contacts, broadcast messages, manage your inbox, build templates, and schedule recurring campaigns.">
+  <script>
+    (function() {
+      var t = localStorage.getItem('whf-theme');
+      if (t === 'light' || (t === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,9 +29,43 @@
       --ink: #eafff4;
       --muted: #7da393;
       --glow: rgba(37, 211, 102, 0.15);
+      --nav-bg: rgba(5, 14, 9, 0.8);
+      --nav-border: rgba(37,211,102,0.08);
+      --stat-bg: rgba(8, 26, 16, 0.9);
+      --term-bar: rgba(12,31,22,0.9);
+      --term-body: rgba(5,14,9,0.95);
+      --ghost-bg: rgba(255,255,255,0.04);
+      --ghost-border: rgba(255,255,255,0.1);
+      --ghost-hover-bg: rgba(255,255,255,0.08);
+      --ghost-hover-border: rgba(255,255,255,0.2);
+      --grid-line: rgba(37,211,102,0.03);
       --font-en: 'Inter', system-ui, sans-serif;
       --font-ar: 'Cairo', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8faf9;
+      --bg2: #eef5f0;
+      --card: rgba(255, 255, 255, 0.7);
+      --card-border: rgba(37, 211, 102, 0.15);
+      --green: #1a9f50;
+      --green-light: #25d366;
+      --green-dark: #0d6b4e;
+      --teal: #0d8a6e;
+      --ink: #0a1f14;
+      --muted: #5a7a6a;
+      --glow: rgba(37, 211, 102, 0.08);
+      --nav-bg: rgba(248, 250, 249, 0.85);
+      --nav-border: rgba(0,0,0,0.06);
+      --stat-bg: rgba(255, 255, 255, 0.8);
+      --term-bar: rgba(238,245,240,0.95);
+      --term-body: rgba(248,250,249,0.98);
+      --ghost-bg: rgba(0,0,0,0.03);
+      --ghost-border: rgba(0,0,0,0.1);
+      --ghost-hover-bg: rgba(0,0,0,0.06);
+      --ghost-hover-border: rgba(0,0,0,0.18);
+      --grid-line: rgba(37,211,102,0.05);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,6 +79,7 @@
       line-height: 1.7;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+      transition: background 0.3s, color 0.3s;
     }
     html[dir="rtl"] body { font-family: var(--font-ar); }
 
@@ -46,8 +89,8 @@
     .bg-grid {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background-image:
-        linear-gradient(rgba(37,211,102,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(37,211,102,0.03) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 60px 60px;
     }
     .bg-glow {
@@ -82,9 +125,9 @@
     .nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       padding: 16px 0;
-      background: rgba(5, 14, 9, 0.8);
+      background: var(--nav-bg);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(37,211,102,0.08);
+      border-bottom: 1px solid var(--nav-border);
       transition: all 0.3s;
     }
     .nav__inner { display: flex; align-items: center; justify-content: space-between; }
@@ -97,6 +140,16 @@
     }
     .nav__logo svg { width: 18px; height: 18px; fill: white; }
     .nav__actions { display: flex; align-items: center; gap: 12px; }
+    .theme-toggle {
+      width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer;
+      background: rgba(37,211,102,0.08); color: var(--muted);
+      display: grid; place-items: center; transition: all 0.25s; padding: 0;
+    }
+    .theme-toggle:hover { color: var(--ink); background: rgba(37,211,102,0.15); }
+    .theme-toggle__icon { width: 16px; height: 16px; }
+    .theme-toggle__icon--moon { display: none; }
+    [data-theme="light"] .theme-toggle__icon--sun { display: none; }
+    [data-theme="light"] .theme-toggle__icon--moon { display: block; }
     .lang-toggle { display: flex; background: rgba(37,211,102,0.08); border-radius: 8px; padding: 3px; }
     .lang-btn {
       padding: 6px 14px; border-radius: 6px; border: none; background: transparent;
@@ -158,10 +211,10 @@
     }
     .btn--primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(37,211,102,0.35), inset 0 1px 0 rgba(255,255,255,0.15); }
     .btn--ghost {
-      background: rgba(255,255,255,0.04); color: var(--ink);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--ghost-bg); color: var(--ink);
+      border: 1px solid var(--ghost-border);
     }
-    .btn--ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    .btn--ghost:hover { background: var(--ghost-hover-bg); border-color: var(--ghost-hover-border); transform: translateY(-2px); }
     .btn svg { width: 18px; height: 18px; }
 
     @keyframes fadeUp {
@@ -178,7 +231,7 @@
     }
     .stat-item {
       padding: 28px 20px; text-align: center;
-      background: rgba(8, 26, 16, 0.9);
+      background: var(--stat-bg);
       backdrop-filter: blur(10px);
     }
     .stat-item__value {
@@ -255,7 +308,7 @@
     }
     .terminal__bar {
       display: flex; align-items: center; gap: 8px; padding: 14px 18px;
-      background: rgba(12,31,22,0.9); border-bottom: 1px solid rgba(37,211,102,0.1);
+      background: var(--term-bar); border-bottom: 1px solid rgba(37,211,102,0.1);
     }
     .terminal__dot { width: 12px; height: 12px; border-radius: 50%; }
     .terminal__dot--r { background: #ff5f57; }
@@ -263,7 +316,7 @@
     .terminal__dot--g { background: #28c840; }
     .terminal__title { flex: 1; text-align: center; font-size: 12px; color: var(--muted); font-weight: 500; }
     .terminal__body {
-      background: rgba(5,14,9,0.95); padding: 24px; direction: ltr; text-align: left;
+      background: var(--term-body); padding: 24px; direction: ltr; text-align: left;
     }
     .terminal__line { display: flex; gap: 10px; margin-bottom: 6px; font-family: var(--font-mono); font-size: 14px; line-height: 1.8; }
     .terminal__prompt { color: var(--green); user-select: none; flex-shrink: 0; }
@@ -354,6 +407,10 @@
         <span data-en="WhatsApp Hub Free" data-ar="WhatsApp Hub Free">WhatsApp Hub Free</span>
       </a>
       <div class="nav__actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
         <div class="lang-toggle">
           <button class="lang-btn active" id="btn-en" onclick="switchLang('en')">EN</button>
           <button class="lang-btn" id="btn-ar" onclick="switchLang('ar')">AR</button>
@@ -548,6 +605,15 @@
   </footer>
 
   <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      if (next === 'light') html.setAttribute('data-theme', 'light');
+      else html.removeAttribute('data-theme');
+      localStorage.setItem('whf-theme', next);
+    }
+
     // Language switching
     const translations = {
       en: {
