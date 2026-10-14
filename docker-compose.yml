@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wa
+      POSTGRES_PASSWORD: wa_password
+      POSTGRES_DB: wa_broadcast
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wa -d wa_broadcast"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # One-shot migration runner. Both app and worker wait for this to finish so
+  # neither queries a table before its migration exists (avoids a P2021 race on
+  # the worker's boot-time schedule sync).
+  migrate:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://wa:wa_password@postgres:5432/whatsapp_hub_free?schema=public
+    depends_on:
+      postgres: { condition: service_healthy }
+    command: ["npx", "prisma", "migrate", "deploy"]
+    restart: "no"
+
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://wa:wa_password@postgres:5432/whatsapp_hub_free?schema=public
+      REDIS_URL: redis://redis:6379
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    command: ["npm", "run", "start"]
+    restart: unless-stopped
+
+  worker:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://wa:wa_password@postgres:5432/whatsapp_hub_free?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    command: ["npm", "run", "worker"]
+    restart: unless-stopped
+    # The image HEALTHCHECK probes the web server (:3000), which the worker does
+    # not run — disable it so the worker isn't perpetually marked unhealthy.
+    healthcheck:
+      disable: true
+
+volumes:
+  pgdata:
+  redisdata:
